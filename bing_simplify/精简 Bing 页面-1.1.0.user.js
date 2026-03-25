@@ -110,7 +110,7 @@ div.hp_media_container_gradient {
         const isSuggestionActive = hasSuggestion && hasInputText && isInputFocused;
 
         const targets = document.querySelectorAll(
-            '.sbox .sb_form.as_show, .sbox_cn .sb_form.as_show, .sbox .sb_form.c_show_form.as_show, .sbox_cn .sb_form.c_show_form.as_show'
+            '.sbox .sb_form.as_show, .sbox_cn .sb_form.as_show, .sbox_sl .sb_form.as_show, .sbox .sb_form.c_show_form.as_show, .sbox_cn .sb_form.c_show_form.as_show, .sbox_sl .sb_form.c_show_form.as_show, .sbox_sl .sb_form.as_show.c_text, .sbox_sl .sb_form.as_show.c_show_form_expanded, .sbox_sl .sb_form.c_show_form.as_show.c_text, .sbox_sl .sb_form.c_show_form.as_show.c_show_form_expanded'
         );
 
         targets.forEach((el) => {
