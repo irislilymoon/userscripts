@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         精简 Bing 页面
 // @namespace    http://tampermonkey.net/
-// @version      1.1.0
+// @version      1.1.2
 // @description  在 Bing 隐藏指定元素，简化页面显示
-// @author       GPT-5.3-Codex
+// @author       GPT-5.3-Codex & Gemini 3.1 Pro Preview
 // @match        https://cn.bing.com/*
 // @match        https://www.bing.com/*
 // @match        https://bing.com/*
@@ -100,14 +100,29 @@ div.hp_media_container_gradient {
         });
     }
 
-    // 仅在“正在输入且 Suggestions 可用”时关闭圆角；其余状态保持 24px 圆角。
+    // 国际站/国内站结构可能略有不同，兼容“有建议块”或“有建议项”。
+    // 强制检查是否有真实的建议列表项（li），避免空容器撑开
+    function hasSuggestionData() {
+        const hasSugItems = !!document.querySelector('#sw_as li.sa_sg, #sw_as li[role="option"]');
+        return hasSugItems;
+    }
+
+    function isElementVisible(el) {
+        if (!el) return false;
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+    }
+
+    // 圆角逻辑只和 suggestion 是否“真正出现”绑定。
+    function isSuggestionPanelVisible() {
+        const swAs = document.querySelector('#sw_as');
+        const saAs = document.querySelector('#sw_as .sa_as');
+        return isElementVisible(swAs) && isElementVisible(saAs) && hasSuggestionData();
+    }
+
+    // 仅在 suggestion 面板有效时关闭圆角；其余状态保持 24px 圆角。
     function updateSearchBoxRadiusByAutosuggestType() {
-        const inputEl = document.querySelector('#sb_form_q');
-        const queryText = (inputEl?.value || '').trim();
-        const hasInputText = queryText.length > 0;
-        const isInputFocused = document.activeElement === inputEl;
-        const hasSuggestion = !!document.querySelector('#sw_as #sa_sug_block');
-        const isSuggestionActive = hasSuggestion && hasInputText && isInputFocused;
+        const isSuggestionActive = isSuggestionPanelVisible();
 
         const targets = document.querySelectorAll(
             '.sbox .sb_form.as_show, .sbox_cn .sb_form.as_show, .sbox_sl .sb_form.as_show, .sbox .sb_form.c_show_form.as_show, .sbox_cn .sb_form.c_show_form.as_show, .sbox_sl .sb_form.c_show_form.as_show, .sbox_sl .sb_form.as_show.c_text, .sbox_sl .sb_form.as_show.c_show_form_expanded, .sbox_sl .sb_form.c_show_form.as_show.c_text, .sbox_sl .sb_form.c_show_form.as_show.c_show_form_expanded'
@@ -122,15 +137,8 @@ div.hp_media_container_gradient {
         });
     }
 
-    // 仅在“输入框聚焦 + 有输入 + Suggestions 可用”时显示建议容器。
+    // 仅做清理与空状态隐藏，避免原本“今日热点”被删后遗留空白阴影条。
     function updateAutosuggestContainerVisibility() {
-        const inputEl = document.querySelector('#sb_form_q');
-        const queryText = (inputEl?.value || '').trim();
-        const hasInputText = queryText.length > 0;
-        const isInputFocused = document.activeElement === inputEl;
-        const hasSuggestion = !!document.querySelector('#sw_as #sa_sug_block');
-        const shouldShow = hasSuggestion && hasInputText && isInputFocused;
-
         // 防止手动检查器隐藏类残留导致容器即使 display:block 仍不可见。
         const inspectorHideClassNames = [
             '__web-inspector-hide-shortcut__',
@@ -141,49 +149,85 @@ div.hp_media_container_gradient {
 
         containers.forEach((el) => {
             inspectorHideClassNames.forEach((cls) => el.classList.remove(cls));
-
-            if (shouldShow) {
-                el.style.setProperty('display', 'block', 'important');
-                el.style.setProperty('visibility', 'visible', 'important');
-            } else {
-                el.style.setProperty('display', 'none', 'important');
-                el.style.setProperty('visibility', 'hidden', 'important');
-            }
         });
 
-        // 与 .sa_as 同步处理父容器，避免父级仍被隐藏。
+        // 与 .sa_as 同步清理父容器残留隐藏类。
         document.querySelectorAll('#sw_as').forEach((el) => {
             inspectorHideClassNames.forEach((cls) => el.classList.remove(cls));
-
-            if (shouldShow) {
-                el.style.setProperty('display', 'block', 'important');
-                el.style.setProperty('visibility', 'visible', 'important');
-            } else {
-                el.style.setProperty('display', 'none', 'important');
-                el.style.setProperty('visibility', 'hidden', 'important');
-            }
         });
+
+        // 隐藏没有真实建议项时残留的高度/阴影条
+        // !!! 绝对不能用 display: none，因为 Bing 的原生联想脚本会测量布局尺寸，强行 display:none 会导致脚本执行中断、联想功能彻底死掉 !!!
+        const swAs = document.querySelector('#sw_as');
+        const saAs = document.querySelector('#sw_as .sa_as');
+
+        if (swAs && saAs) {
+            if (hasSuggestionData()) {
+                saAs.style.removeProperty('opacity');
+                saAs.style.removeProperty('visibility');
+                saAs.style.removeProperty('pointer-events');
+            } else {
+                // 不阻断 DOM 的结构，仅视觉隐身，让 Bing 得以顺利插入下拉项
+                saAs.style.setProperty('opacity', '0', 'important');
+                saAs.style.setProperty('visibility', 'hidden', 'important');
+                saAs.style.setProperty('pointer-events', 'none', 'important');
+            }
+        }
+    }
+
+    let isApplying = false;
+
+    function applyState() {
+        if (isApplying) return;
+        isApplying = true;
+        try {
+            hideByScript();
+            removeTrendingAutosuggestBlock();
+            updateAutosuggestContainerVisibility();
+            updateSearchBoxRadiusByAutosuggestType();
+        } finally {
+            isApplying = false;
+        }
     }
 
     function run() {
         injectStyle();
-        hideByScript();
-        updateSearchBoxRadiusByAutosuggestType();
-        removeTrendingAutosuggestBlock();
-        updateAutosuggestContainerVisibility();
+        applyState();
     }
 
     run();
 
+    let syncPending = false;
+    function scheduleSync() {
+        if (syncPending) return;
+        syncPending = true;
+
+        // 先立即同步，减少可感知延迟；下一帧再复核一次处理异步渲染。
+        applyState();
+        requestAnimationFrame(() => {
+            syncPending = false;
+            applyState();
+        });
+    }
+
+    const inputEl = document.querySelector('#sb_form_q');
+    if (inputEl) {
+        ['focus', 'blur', 'input', 'keyup'].forEach((evt) => {
+            inputEl.addEventListener(evt, scheduleSync, true);
+        });
+    }
+
+    document.addEventListener('click', scheduleSync, true);
+
     const observer = new MutationObserver(() => {
-        hideByScript();
-        updateSearchBoxRadiusByAutosuggestType();
-        removeTrendingAutosuggestBlock();
-        updateAutosuggestContainerVisibility();
+        if (isApplying) return;
+        scheduleSync();
     });
 
     observer.observe(document.documentElement, {
         childList: true,
-        subtree: true
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class', 'aria-expanded']
     });
 })();
