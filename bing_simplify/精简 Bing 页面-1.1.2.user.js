@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         精简 Bing 页面
 // @namespace    http://tampermonkey.net/
-// @version      1.1.2
+// @version      1.1.3
 // @description  在 Bing 隐藏指定元素，简化页面显示
 // @author       GPT-5.3-Codex & Gemini 3.1 Pro Preview
 // @match        https://cn.bing.com/*
@@ -25,6 +25,8 @@ div.musCard,
 div.mic_cont.icon,
 div.sb_form_placeholder,
 button#sb_feedback,
+button#sb_feedback_floating,
+button.feedback_button,
 div.moduleCont,
 footer#footer {
     display: none !important;
@@ -63,6 +65,8 @@ div.hp_media_container_gradient {
             'div.mic_cont.icon',
             'div.sb_form_placeholder',
             'button#sb_feedback',
+            'button#sb_feedback_floating',
+            'button.feedback_button',
             'div.moduleCont',
             'footer#footer',
             'div.dimmer',
