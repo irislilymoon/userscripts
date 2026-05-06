@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         智慧树测验解除复制限制
-// @version      3.3
+// @version      3.4
 // @description  解除测验的复制限制
 // @author       Gemini 3.1 Pro
 // @match        *://*.zhihuishu.com/*
+// @exclude      *://passport.zhihuishu.com/*
 // @icon         https://qah5.zhihuishu.com/favicon.ico
 // @grant        none
 // ==/UserScript==
