@@ -161,6 +161,10 @@
         const specialCards = document.querySelectorAll('.video-page-special-card-small');
         specialCards.forEach(card => card.style.display = 'none');
 
+        // 隐藏 strip 条幅广告（.ad-report.strip-ad）
+        const stripAds = document.querySelectorAll('.ad-report.strip-ad');
+        stripAds.forEach(ad => ad.style.display = 'none');
+
         const svgs = document.querySelectorAll('.badge-icon, .badge svg');
         svgs.forEach(svg => {
             if (svg.innerHTML.includes('M6.079 13.1514') || svg.innerHTML.includes('11.2743 1.00196')) {

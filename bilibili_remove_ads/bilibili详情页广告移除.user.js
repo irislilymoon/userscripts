@@ -41,7 +41,11 @@
         const specialCards = document.querySelectorAll('.video-page-special-card-small');
         specialCards.forEach(card => card.style.display = 'none');
 
-        // 6. 隐藏带有“小火箭” SVG 图标的推广视频 (充电专属/推广)
+        // 6. 隐藏 strip 条幅广告（.ad-report.strip-ad）
+        const stripAds = document.querySelectorAll('.ad-report.strip-ad');
+        stripAds.forEach(ad => ad.style.display = 'none');
+
+        // 7. 隐藏带有”小火箭” SVG 图标的推广视频 (充电专属/推广)
         const svgs = document.querySelectorAll('.badge-icon, .badge svg');
         svgs.forEach(svg => {
             // 小火箭的 SVG PATH 特征片段
