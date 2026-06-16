@@ -97,6 +97,14 @@
             slideAd.style.display = 'none';
         }
 
+        // 隐藏底部 floor 广告横幅
+        const floorAds = document.querySelectorAll('.ad-report.ad-floor-exp.right-bottom-banner');
+        floorAds.forEach(ad => ad.style.display = 'none');
+
+        // 隐藏特殊推广卡片（.video-page-special-card-small，区别于正常 .video-page-card-small）
+        const specialCards = document.querySelectorAll('.video-page-special-card-small');
+        specialCards.forEach(card => card.style.display = 'none');
+
         const svgs = document.querySelectorAll('.badge-icon, .badge svg');
         svgs.forEach(svg => {
             if (svg.innerHTML.includes('M6.079 13.1514') || svg.innerHTML.includes('11.2743 1.00196')) {
