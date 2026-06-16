@@ -33,7 +33,15 @@
             slideAd.style.display = 'none';
         }
 
-        // 4. 隐藏带有“小火箭” SVG 图标的推广视频 (充电专属/推广)
+        // 4. 隐藏底部 floor 广告横幅（.ad-report.ad-floor-exp.right-bottom-banner）
+        const floorAds = document.querySelectorAll('.ad-report.ad-floor-exp.right-bottom-banner');
+        floorAds.forEach(ad => ad.style.display = 'none');
+
+        // 5. 隐藏特殊推广卡片（.video-page-special-card-small，区别于正常 .video-page-card-small）
+        const specialCards = document.querySelectorAll('.video-page-special-card-small');
+        specialCards.forEach(card => card.style.display = 'none');
+
+        // 6. 隐藏带有“小火箭” SVG 图标的推广视频 (充电专属/推广)
         const svgs = document.querySelectorAll('.badge-icon, .badge svg');
         svgs.forEach(svg => {
             // 小火箭的 SVG PATH 特征片段
