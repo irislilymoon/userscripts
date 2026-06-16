@@ -27,7 +27,13 @@
             }
         });
 
-        // 3. 隐藏带有“小火箭” SVG 图标的推广视频 (充电专属/推广)
+        // 3. 隐藏 id="slide_ad" 的滑动广告（通用泛化，不限于某个广告位）
+        const slideAd = document.getElementById('slide_ad');
+        if (slideAd) {
+            slideAd.style.display = 'none';
+        }
+
+        // 4. 隐藏带有“小火箭” SVG 图标的推广视频 (充电专属/推广)
         const svgs = document.querySelectorAll('.badge-icon, .badge svg');
         svgs.forEach(svg => {
             // 小火箭的 SVG PATH 特征片段
