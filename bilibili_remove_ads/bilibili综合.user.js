@@ -148,6 +148,11 @@
             }
         });
 
+        const slideAd = document.getElementById('slide_ad');
+        if (slideAd) {
+            slideAd.style.display = 'none';
+        }
+
         const svgs = document.querySelectorAll('.badge-icon, .badge svg');
         svgs.forEach(svg => {
             if (svg.innerHTML.includes('M6.079 13.1514') || svg.innerHTML.includes('11.2743 1.00196')) {
